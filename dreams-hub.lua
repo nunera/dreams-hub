@@ -2,7 +2,7 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shl
 local Window = OrionLib:MakeWindow({Name = "Dreams Hub", HidePremium = true, SaveConfig = true, ConfigFolder = "DreamsHub",IntroText = "Dreams Hub Loading..."})
 local plrs = game:GetService("Players")
 local localplr = plrs.LocalPlayer
-
+local highlights = {}
 
 
 local function highlight(v)
@@ -10,21 +10,32 @@ local function highlight(v)
 	else
 		local team = v.Team
 		if team == nil then
-			highlight = Instance.new("Highlight")
+			local highlight = Instance.new("Highlight")
+			table.insert(highlights,highlight)
 			highlight.Parent = v.Character
+			highlight.Enabled = _G.on
 			highlight.OutlineColor = _G.outlinecolor
 			highlight.OutlineTransparency = _G.outlineopacity
 			highlight.FillColor = _G.fillcolor
 			highlight.FillTransparency = _G.outlineopacity
+			v.CharacterAdded:Connect(function()
+				local highlight = Instance.new("Highlight")
+				table.insert(highlights,highlight)
+				highlight.Parent = v.Character
+				highlight.Enabled = _G.on
+				highlight.OutlineColor = _G.outlinecolor
+				highlight.OutlineTransparency = _G.outlineopacity
+				highlight.FillColor = _G.fillcolor
+				highlight.FillTransparency = _G.outlineopacity
+				for i,v in pairs(highlights) do
+				    v.OutlineColor = _G.outlinecolor
+				    v.OutlineTransparency = _G.outlineopacity
+				    v.FillColor = _G.fillcolor
+				    v.FillTransparency = _G.fillopacity
+			    end
+			end)
 		else
-			lochighlight = Instance.new("Highlight")
-			teamcolor = team.TeamColor
-			color3team = teamcolor.Color
-			highlight.Parent = v.Character
-			highlight.OutlineColor = color3team
-			highlight.OutlineTransparency = 0.3
-			highlight.FillColor = color3team
-			highlight.FillTransparency = 0.5
+
 		end
 	end
 end
@@ -46,6 +57,9 @@ local esp = Tab:AddToggle({
 		_G.on = Value
 		local teams = game.Teams:GetChildren()
 		if _G.on then
+			for i,v in pairs(highlights) do
+				v.Enabled = true
+			end
 			if #teams == 0 then
 				OrionLib:MakeNotification({
 					Name = "No Teams!",
@@ -54,8 +68,9 @@ local esp = Tab:AddToggle({
 					Time = 5
 				})
 			end
-			for i,v in pairs(game.Players:GetChildren()) do
-			   highlight(v)
+		else
+			for i,v in pairs(highlights) do
+				v.Enabled = false
 			end
 		end
 	end    
@@ -76,6 +91,9 @@ Tab:AddColorpicker({
 	Default = Color3.fromRGB(255, 0, 0),
 	Callback = function(Value)
 		_G.fillcolor = Value
+		for i,v in pairs(highlights) do
+			v.FillColor = _G.fillcolor
+		end
 	end	  
 })
 Tab:AddSlider({
@@ -87,7 +105,10 @@ Tab:AddSlider({
 	Increment = 1,
 	ValueName = "%",
 	Callback = function(Value)
-		_G.fillopacity = Value
+		_G.fillopacity = Value/100
+		for i,v in pairs(highlights) do
+			v.FillTransparency = _G.fillopacity
+		end
 	end    
 })
 Tab:AddColorpicker({
@@ -95,6 +116,9 @@ Tab:AddColorpicker({
 	Default = Color3.fromRGB(255, 0, 0),
 	Callback = function(Value)
 		_G.outlinecolor = Value
+		for i,v in pairs(highlights) do
+			v.OutlineColor = _G.outlinecolor
+		end
 	end	  
 })
 Tab:AddSlider({
@@ -106,7 +130,10 @@ Tab:AddSlider({
 	Increment = 1,
 	ValueName = "%",
 	Callback = function(Value)
-		_G.outlineopacity = Value
+		_G.outlineopacity = Value/100
+		for i,v in pairs(highlights) do
+			v.OutlineTransparency = _G.outlineopacity
+		end
 	end    
 })
 local teamcolor = Tab:AddToggle({
@@ -116,15 +143,15 @@ local teamcolor = Tab:AddToggle({
 		_G.teamcolor = Value
 		local teams = game.Teams:GetChildren()
 		if _G.teamcolor then
-		if #teams == 0 then
-		    _G.teamcolor = false
-			OrionLib:MakeNotification({
-				Name = "No Teams!",
-				Content = "Detected no teams, can't do team colors.",
-				Image = "rbxassetid://10253109726",
-				Time = 5
-			})
-		end
+			if #teams == 0 then
+				_G.teamcolor = false
+				OrionLib:MakeNotification({
+					Name = "No Teams!",
+					Content = "Detected no teams, can't do team colors.",
+					Image = "rbxassetid://10253109726",
+					Time = 5
+				})
+			end
 		end
 	end    
 })
@@ -178,3 +205,16 @@ keybinds:AddBind({
 		end
 	end    
 })
+
+
+
+
+
+
+for i,v in pairs(game.Players:GetChildren()) do
+	highlight(v)
+end
+
+plrs.PlayerAdded:Connect(function(plr)
+	highlight(plr)
+end)
