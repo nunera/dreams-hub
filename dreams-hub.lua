@@ -64,12 +64,6 @@ local function highlight(v)
 					highlight.OutlineTransparency = _G.outlineopacity
 					highlight.FillColor = team.TeamColor.Color
 					highlight.FillTransparency = _G.outlineopacity
-					for i,v in pairs(highlights) do
-						v.OutlineColor = _G.outlinecolor
-						v.OutlineTransparency = _G.outlineopacity
-						v.FillColor = _G.fillcolor
-						v.FillTransparency = _G.fillopacity
-					end
 				end)
 			else
 				local highlight = Instance.new("Highlight")
@@ -222,6 +216,7 @@ local teamcolor = Tab:AddToggle({
 				})
 			else
 				print("theres teams")
+				print(highlights)
 				for i,v in pairs(highlights) do
 					print("highlight changed")
 					local plr = getPlayerFromCharacter(v.Parent)
