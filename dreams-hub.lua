@@ -5,7 +5,18 @@ local localplr = plrs.LocalPlayer
 local highlights = {}
 
 
+local function getPlayerFromCharacter(character)
+	for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+		if player.Character == character then
+			return player
+		end
+	end
+end
+
+
+
 local function highlight(v)
+	local localplrteam = localplr.Team
 	if v == localplr then
 	else
 		local team = v.Team
@@ -28,14 +39,64 @@ local function highlight(v)
 				highlight.FillColor = _G.fillcolor
 				highlight.FillTransparency = _G.outlineopacity
 				for i,v in pairs(highlights) do
-				    v.OutlineColor = _G.outlinecolor
-				    v.OutlineTransparency = _G.outlineopacity
-				    v.FillColor = _G.fillcolor
-				    v.FillTransparency = _G.fillopacity
-			    end
+					v.OutlineColor = _G.outlinecolor
+					v.OutlineTransparency = _G.outlineopacity
+					v.FillColor = _G.fillcolor
+					v.FillTransparency = _G.fillopacity
+				end
 			end)
 		else
-
+			if _G.teamcolor then
+				local highlight = Instance.new("Highlight")
+				table.insert(highlights,highlight)
+				highlight.Parent = v.Character
+				highlight.Enabled = _G.on
+				highlight.OutlineColor = team.TeamColor.Color
+				highlight.OutlineTransparency = _G.outlineopacity
+				highlight.FillColor = team.TeamColor.Color
+				highlight.FillTransparency = _G.outlineopacity
+				v.CharacterAdded:Connect(function()
+					local highlight = Instance.new("Highlight")
+					table.insert(highlights,highlight)
+					highlight.Parent = v.Character
+					highlight.Enabled = _G.on
+					highlight.OutlineColor = team.TeamColor.Color
+					highlight.OutlineTransparency = _G.outlineopacity
+					highlight.FillColor = team.TeamColor.Color
+					highlight.FillTransparency = _G.outlineopacity
+					for i,v in pairs(highlights) do
+						v.OutlineColor = _G.outlinecolor
+						v.OutlineTransparency = _G.outlineopacity
+						v.FillColor = _G.fillcolor
+						v.FillTransparency = _G.fillopacity
+					end
+				end)
+			else
+				local highlight = Instance.new("Highlight")
+				table.insert(highlights,highlight)
+				highlight.Parent = v.Character
+				highlight.Enabled = _G.on
+				highlight.OutlineColor = _G.outlinecolor
+				highlight.OutlineTransparency = _G.outlineopacity
+				highlight.FillColor = _G.fillcolor
+				highlight.FillTransparency = _G.outlineopacity
+				v.CharacterAdded:Connect(function()
+					local highlight = Instance.new("Highlight")
+					table.insert(highlights,highlight)
+					highlight.Parent = v.Character
+					highlight.Enabled = _G.on
+					highlight.OutlineColor = _G.outlinecolor
+					highlight.OutlineTransparency = _G.outlineopacity
+					highlight.FillColor = _G.fillcolor
+					highlight.FillTransparency = _G.outlineopacity
+					for i,v in pairs(highlights) do
+						v.OutlineColor = _G.outlinecolor
+						v.OutlineTransparency = _G.outlineopacity
+						v.FillColor = _G.fillcolor
+						v.FillTransparency = _G.fillopacity
+					end
+				end)
+			end
 		end
 	end
 end
@@ -90,9 +151,12 @@ Tab:AddColorpicker({
 	Name = "Fill Color",
 	Default = Color3.fromRGB(255, 0, 0),
 	Callback = function(Value)
-		_G.fillcolor = Value
-		for i,v in pairs(highlights) do
-			v.FillColor = _G.fillcolor
+		if _G.teamcolor then
+		else
+			_G.fillcolor = Value
+			for i,v in pairs(highlights) do
+				v.FillColor = _G.fillcolor
+			end
 		end
 	end	  
 })
@@ -115,9 +179,12 @@ Tab:AddColorpicker({
 	Name = "Outline Color",
 	Default = Color3.fromRGB(255, 0, 0),
 	Callback = function(Value)
-		_G.outlinecolor = Value
-		for i,v in pairs(highlights) do
-			v.OutlineColor = _G.outlinecolor
+		if _G.teamcolor then
+		else
+			_G.outlinecolor = Value
+			for i,v in pairs(highlights) do
+				v.OutlineColor = _G.outlinecolor
+			end
 		end
 	end	  
 })
@@ -140,9 +207,11 @@ local teamcolor = Tab:AddToggle({
 	Name = "Team Color",
 	Default = false,
 	Callback = function(Value)
+		print("toggled")
 		_G.teamcolor = Value
 		local teams = game.Teams:GetChildren()
 		if _G.teamcolor then
+			print("its on")
 			if #teams == 0 then
 				_G.teamcolor = false
 				OrionLib:MakeNotification({
@@ -151,6 +220,16 @@ local teamcolor = Tab:AddToggle({
 					Image = "rbxassetid://10253109726",
 					Time = 5
 				})
+			else
+				print("theres teams")
+				for i,v in pairs(highlights) do
+					print("highlight changed")
+					local plr = getPlayerFromCharacter(v.Parent)
+					local teamcolor = plr.Team.TeamColor.Color
+					v.FillColor = teamcolor
+					v.OutlineColor = teamcolor
+					print(v.Name,"Changed to",teamcolor)
+				end
 			end
 		end
 	end    
